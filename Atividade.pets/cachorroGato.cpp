@@ -24,7 +24,6 @@ pet **pet::inserir(pet **p, string n, string r, int i, int t)
     novo->prox = NULL;
     novo->ant = NULL;
 
-    // Lista vazia
     if (p[0] == NULL)
     {
         p[0] = novo;
@@ -62,13 +61,15 @@ pet **pet::inserir(pet **p, string n, string r, int i, int t)
     {
         novo->prox = aux;
         novo->ant = aux->ant;
-        if (aux->ant != NULL)
+        if (aux->ant != NULL) {
             aux->ant->prox = novo;
-        else
+        }
+        else {
             p[0] = novo;
+        }
         aux->ant = novo;
     }
-    else // gato no meio
+    else
     {
         novo->prox = aux->prox;
         novo->ant = aux;
@@ -118,14 +119,14 @@ pet **pet::excluir(pet **p, string n, int t)
         aux->ant->prox = aux->prox;
         aux->prox->ant = aux->ant;
         delete (aux);
-        return p;
-    }
+    };
+    return p;
 }
 
-void pet::listar(pet **p, int o)
+void pet::listar(pet **p, int op)
 {
     pet *aux;
-    if (o == 0)
+    if (op == 0)
     {
         aux = p[0];
         while (aux != NULL)
@@ -134,7 +135,7 @@ void pet::listar(pet **p, int o)
             aux = aux->prox;
         }
     }
-    else if (o == 1)
+    else if (op == 1)
     {
         aux = p[0];
         while (aux != NULL && aux->tipo == 1)
@@ -181,7 +182,6 @@ bool pet::pesquisar(pet **p, string n, int t)
 }
 
 void Menu() {
-    system("clear");
     cout << "1. Cadastrar pet" << endl;
     cout << "2. Excluir" << endl;
     cout << "3. Listagem geral" << endl;
@@ -244,7 +244,7 @@ int main()
             }
             break;
 
-        case 3:
+        case 3: // listagem geraL
             if (L[0] == NULL)
             {
                 cout << "Sem registros!" << endl;
@@ -256,7 +256,7 @@ int main()
             }
             break;
 
-        case 4:
+        case 4: // listagem cachorro
             if (L[0] == NULL)
             {
                 cout << "Sem registros!" << endl;
@@ -268,7 +268,7 @@ int main()
             }
             break;
 
-        case 5:
+        case 5: // listagem gatos
             if (L[0] == NULL)
             {
                 cout << "Sem registros!" << endl;
@@ -309,6 +309,7 @@ int main()
             cout << "Opcao invalida" << endl;
             break;
         }
+        cin.ignore().get();
     } while (op != 7);
 
     return 0;
