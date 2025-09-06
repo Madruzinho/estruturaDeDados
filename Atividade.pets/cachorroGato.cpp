@@ -304,6 +304,7 @@ int main()
 
         case 7:
             cout << "TCHAUU";
+            break;
 
         default:
             cout << "Opcao invalida" << endl;

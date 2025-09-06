@@ -9,10 +9,12 @@ public:
     int idade;
     char tipo_do_cliente;
     fila *ant, *prox;
-    fila **inserir(fila **, string, int);
-    fila **excluir(fila **, char);
-    void exibirFila(fila **);
+
+    fila* inserir(fila* inicio, string n, int i);
+    fila* excluir(fila* inicio, char tipo);
+    void exibirFila(fila* inicio);
 };
+
 
 bool verificarPreferencia(int i) {
     if(i >= 60) {
@@ -21,114 +23,85 @@ bool verificarPreferencia(int i) {
     return false; 
 }
 
-fila **fila::inserir(fila **p, string n, int i)
-{
-    fila *novo = new fila();
+fila* fila::inserir(fila* inicio, string n, int i) {
+    fila* novo = new fila();
     novo->nome_do_cliente = n;
     novo->idade = i;
-    if(verificarPreferencia(i)) novo->tipo_do_cliente = 'P';
-    else novo->tipo_do_cliente = 'C';
+    novo->tipo_do_cliente = verificarPreferencia(i) ? 'P' : 'C';
     novo->prox = NULL;
     novo->ant = NULL;
 
-    if (p[0] == NULL)
-    {
-        p[0] = novo;
-        p[1] = novo;
-        return p;
+    if (inicio == NULL) {
+        return novo; // primeira inserção
     }
 
-    fila *aux;
-    if (novo->tipo_do_cliente == 'P')
-    {
-        aux = p[0];
-        while ((aux != NULL) && (aux->tipo_do_cliente == 'P'))
-            aux = aux->prox;
-    }
-    else 
-    {
-        aux = p[1];
-        while ((aux != NULL) && (aux->tipo_do_cliente == 'C'))
-            aux = aux->ant;
+    // Preferencial → insere no início
+    if (novo->tipo_do_cliente == 'P') {
+        novo->prox = inicio;
+        inicio->ant = novo;
+        return novo;
     }
 
-    if (aux == NULL && novo->tipo_do_cliente == 'P')
-    {
-        p[1]->prox = novo;
-        novo->ant = p[1];
-        p[1] = novo;
+    // Comum → insere no fim
+    fila* aux = inicio;
+    while (aux->prox != NULL) {
+        aux = aux->prox;
     }
-    else if (aux == NULL && novo->tipo_do_cliente == 'C')
-    {
-        novo->prox = p[0];
-        p[0]->ant = novo;
-        p[0] = novo;
-    }
-    else if (novo->tipo_do_cliente == 'P')
-    {
-        novo->prox = aux;
-        novo->ant = aux->ant;
-        if (aux->ant != NULL) {
-            aux->ant->prox = novo;
-        }
-        else {
-            p[0] = novo;
-        }
-        aux->ant = novo;
-    }
-    else
-    {
-        novo->prox = aux->prox;
-        novo->ant = aux;
+    aux->prox = novo;
+    novo->ant = aux;
 
-        if (aux->prox != NULL)
-            aux->prox->ant = novo;
-        else
-            p[1] = novo;
-
-        aux->prox = novo;
-    }
-
-    return p;
+    return inicio;
 }
 
-fila **fila::excluir(fila **p, char t)
-{
-    fila *aux;
-    if (aux == p[0])
-    {
-        p[0] = p[0]->prox;
-        p[0]->ant = NULL;
-    }
-    else
-    {
-        p[1] = p[1]->ant;
-        p[1]->prox = NULL;
-    }
-        delete (aux);
-        return p;
+fila* fila::excluir(fila* inicio, char tipo) {
+    if (inicio == NULL) {
+        cout << "Fila vazia!" << endl;
+        return NULL;
     }
 
-void fila::exibirFila(fila **p)
-{
-    fila *aux;
-    
-    cout << "Fila preferencial: " << endl;
-        aux = p[0];
-        while ((aux != NULL) && (aux->tipo_do_cliente == 'P'))
-        {
-            cout << aux->nome_do_cliente << "-" << aux->idade << endl;
+    fila* aux;
+
+    if (tipo == 'P') { // remove do início
+        aux = inicio;
+        inicio = inicio->prox;
+        if (inicio != NULL) {
+            inicio->ant = NULL;
+        }
+        delete aux;
+        return inicio;
+    }
+
+    if (tipo == 'C') { // remove do final
+        aux = inicio;
+        while (aux->prox != NULL) {
             aux = aux->prox;
         }
-    
-    cout << "Fila comum: " << endl;
-        aux = p[1];
-        while (aux != NULL)
-        {
-            cout << aux->nome_do_cliente << "-" << aux->idade << endl;
-            aux = aux->prox;
+        if (aux->ant != NULL) {
+            aux->ant->prox = NULL;
+        } else {
+            inicio = NULL; // lista ficou vazia
         }
-    };
+        delete aux;
+    }
+
+    return inicio;
+}
+
+void fila::exibirFila(fila* inicio) {
+    fila* aux = inicio;
+
+    cout << "Fila preferencial:" << endl;
+    while (aux != NULL && aux->tipo_do_cliente == 'P') {
+        cout << aux->nome_do_cliente << " - " << aux->idade << endl;
+        aux = aux->prox;
+    }
+
+    cout << "Fila comum:" << endl;
+    while (aux != NULL) {
+        cout << aux->nome_do_cliente << " - " << aux->idade << endl;
+        aux = aux->prox;
+    }
+}
 
 void Menu() {
     cout << "1. Inserir" << endl;
@@ -139,57 +112,49 @@ void Menu() {
 
 int main()
 {
-    fila O, **L, *resp;
-    L = new fila*[2];
-    L[0] = L[1] = NULL;
-    string nome_do_cliente;
+    fila O;
+    fila* L = NULL;
+    string nome;
     int idade, op;
+    char tipo;
 
     L = O.inserir(L, "Lucio", 5);   
     L = O.inserir(L, "Joao Vitor", 15 );    
     L = O.inserir(L, "Jose Eduardo", 80);   
     L = O.inserir(L, "Luana", 61);     
 
-    do
-    {
+    do {
         Menu();
         cin >> op;
-        switch (op)
-        {
+
+        switch (op) {
         case 1:
             cout << "Informe o nome e idade: ";
-            cin >> nome_do_cliente;
-            cin >> idade;
-
-            L = O.inserir(L, nome_do_cliente, idade);
-                if(idade >= 60)
-                cout << "cliente inserido na fila preferencial" << endl;
-                else {
-                    cout << "Cliente inserido na fila comum" << endl;
-                }
+            cin >> nome >> idade;
+            L = O.inserir(L, nome, idade);
+            cout << ((idade >= 60) ? "Inserido na fila preferencial" : "Inserido na fila comum") << endl;
             break;
 
-        case 3: // listagem geraL
-            if (L[0] == NULL)
-            {
-                cout << "Sem registros!" << endl;
-            }
-            else
-            {
-                cout << "Listagem: " << endl;
-                O.exibirFila(L);
-            }
+        case 2:
+            cout << "Excluir (P = preferencial, C = comum): ";
+            cin >> tipo;
+            L = O.excluir(L, tipo);
+            break;
+
+        case 3:
+            if (L == NULL) cout << "Fila vazia!" << endl;
+            else O.exibirFila(L);
             break;
 
         case 4:
-            cout << "TCHAUU";
+            cout << "Tchau!" << endl;
+            break;
 
         default:
-            cout << "Opcao invalida" << endl;
-            break;
+            cout << "Opcao invalida!" << endl;
         }
-        cin.ignore().get();
-    } while (op != 7);
+
+    } while (op != 4);
 
     return 0;
 }
