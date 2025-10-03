@@ -1,5 +1,5 @@
 #include <iostream>
-#include <windows.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -50,11 +50,15 @@ lista** lista::inserir(lista** r, string n, int t) {
 void lista::listar(lista **r) {
     lista *aux = r[0];
 
+    if(r[0] == NULL) {
+        cout << "Não possui processos";
+    } else {
     while ( aux != r[1]) {
         cout << aux-> nome << aux-> tempo << endl;
         aux = aux->elo;
     }
     cout << aux->nome << aux->tempo;
+    }
 };
 
 lista* lista::pesquisar(lista **r, string n) {
@@ -88,12 +92,12 @@ lista** lista::excluir(lista **r, string n) {
 };
 
 lista** lista::executar(lista **r) {
-    unsigned int microsegundo = 1000;
+    unsigned int microsegundo = 1000000;
     lista *aux1 = r[0], *aux2;
     while(aux1 != NULL) {
         if (aux1->tempo > 0) {
             cout << aux1->nome << " " << aux1->tempo << endl;
-            Sleep(microsegundo);
+            usleep(microsegundo);
             aux1->tempo--;
             aux1 = aux1->elo;
         } else {
